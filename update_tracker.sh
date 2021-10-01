@@ -20,7 +20,7 @@ do
 	transmission-edit --add $t /var/lib/transmission/.config/transmission-daemon/torrents/*.torrent > /dev/null
 	echo "Added tracker $t to all torrents"
 	a=$(expr $a + 1)
-done && echo "[OK] STEP4 completed"
+done && chown transmission:transmission /var/lib/transmission/.config/transmission-daemon/torrents/*.torrent && echo "[OK] STEP4 completed"
 
 echo "STEP5: delete temp files"
 rm -f tmp_tracker.txt* && echo "[OK] STEP5 completed"
