@@ -3,6 +3,7 @@
 # This script is used to apply the newest tracker list to all torrents
 # By: MCUmbrella
 
+transmission-edit -h &> /dev/null && echo "[OK] Transmission daemon check successful" || (echo "[ERROR] Do you have transmission-daemon installed?" && exit -1)
 echo "STEP1: create temp files"
 echo > tmp_tracker.txt && echo > tmp_tracker.txt.new && echo "[OK] STEP1 completed"
 
