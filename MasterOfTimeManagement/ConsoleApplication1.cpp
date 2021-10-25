@@ -8,6 +8,7 @@ SPECIAL THANKS TO:
 
 #include <iostream>
 #include <windows.h>
+#include <time.h>
 
 SERVICE_STATUS ServiceStatus;
 SERVICE_STATUS_HANDLE hServiceStatusHandle;
@@ -16,6 +17,7 @@ using namespace std;
 
 const int
 r1150 = 11 * 60 + 50, //11:50
+r1200 = 12 * 60,      //12:00
 r1215 = 12 * 60 + 15, //12:15
 r1810 = 18 * 60 + 10, //18:10
 r2110 = 21 * 60 + 10; //21:10
@@ -66,22 +68,37 @@ void WINAPI service_main(int argc, char** argv)
         DWORD nError = GetLastError();
     }
 
-    for (r=true;r;Sleep(10000)) // every 10s
+    for (r=true;r;Sleep(60000)) // every 60s
     {
-        struct tm t;
+        struct tm* t;
         time_t tt;
         time(&tt);
-        localtime_s(&t, &tt);
-        int mins = t.tm_hour * 60 + t.tm_min;
-        cout << t.tm_hour << "h " << t.tm_min << "m: ";
-        if ((mins >= r1150 && mins < r1215) || (mins >= r1810 && mins < r2110)) // mins in ([11:50, 12:15] || [18:10, 21:10])
+        t = localtime(&tt);
+        int mins = t->tm_hour * 60 + t->tm_min;
+        cout << t->tm_hour << "h " << t->tm_min << "m: ";
+        if(t->tm_wday == 6) //saturday
         {
-            cout << "shutdown" << endl;
-            system("C:\\Windows\\System32\\shutdown.exe /s /f /t 0");
+            if((mins >= r1200 && mins < r1215) || (mins >= r1810 && mins < r2110)) //mins in ([12:00, 12:15] || [18:10, 21:10])
+            {
+                if(mins == r1200 || mins == r1810) {system("C:\\Windows\\System32\\shutdown.exe /s /f /t 0");}// shutdown at 12:00 || 18:10
+                system("C:\\Windows\\System32\\wbem\\WMIC.exe path win32_networkadapter where PhysicalAdapter=True call disable");
+            }
+            else
+            {
+                system("C:\\Windows\\System32\\wbem\\WMIC.exe path win32_networkadapter where PhysicalAdapter=True call enable");
+            }
         }
-        else
+        else //not saturday
         {
-            cout << "no operation" << endl;
+            if((mins >= r1150 && mins < r1215) || (mins >= r1810 && mins < r2110)) // mins in ([11:50, 12:15] || [18:10, 21:10])
+            {
+                if(mins == r1150 || mins == r1810) {system("C:\\Windows\\System32\\shutdown.exe /s /f /t 0");}// shutdown at 11:50 || 18:10
+                system("C:\\Windows\\System32\\wbem\\WMIC.exe path win32_networkadapter where PhysicalAdapter=True call disable");
+            }
+            else
+            {
+                system("C:\\Windows\\System32\\wbem\\WMIC.exe path win32_networkadapter where PhysicalAdapter=True call enable");
+            }
         }
     }
 
