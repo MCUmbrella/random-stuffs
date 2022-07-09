@@ -16,13 +16,14 @@ echo >> tmp_tracker.txt.new && echo "[OK] STEP3 completed"
 
 echo "STEP4: add tracker(s) to all torrents"
 a=0
-for t in $(cat tmp_tracker.txt.new)
+for t in $(grep --invert-match "\\[" tmp_tracker.txt.new)
 do
-	transmission-edit --add $t /var/lib/transmission/.config/transmission-daemon/torrents/*.torrent > /dev/null
-	echo "Added tracker $t to all torrents"
-	a=$(expr $a + 1)
+  	transmission-edit --add $t /var/lib/transmission/.config/transmission-daemon/torrents/*.torrent > /dev/null
+        echo "Added tracker $t to all torrents"
+        a=$(expr $a + 1)
 done && chown transmission:transmission /var/lib/transmission/.config/transmission-daemon/torrents/*.torrent && echo "[OK] STEP4 completed"
 
 echo "STEP5: delete temp files"
 rm -f tmp_tracker.txt* && echo "[OK] STEP5 completed"
 echo "[OK] $a tracker(s) added"
+systemctl restart transmission-daemon.service && echo "[OK] restarted Transmission daemon"
